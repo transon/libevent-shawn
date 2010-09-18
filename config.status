@@ -448,7 +448,7 @@ Copyright (C) 2009 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/shawny/software/eclipse/workspace/libevent-1.4.14b-stable'
+ac_pwd='/home/shawny/software/eclipse/workspace/libevent-shawn'
 srcdir='.'
 INSTALL='/usr/bin/install -c'
 MKDIR_P='/bin/mkdir -p'
@@ -574,7 +574,7 @@ FGREP='/bin/grep -F'
 LD='/usr/bin/ld'
 NM='/usr/bin/nm -B'
 LN_S='ln -s'
-max_cmd_len='1572864'
+max_cmd_len='805306365'
 ac_objext='o'
 exeext=''
 lt_unset='unset'
@@ -857,7 +857,7 @@ S["build_cpu"]="i686"
 S["build"]="i686-pc-linux-gnu"
 S["am__untar"]="${AMTAR} xf -"
 S["am__tar"]="${AMTAR} chof - \"$$tardir\""
-S["AMTAR"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-1.4.14b-stable/missing --run tar"
+S["AMTAR"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-shawn/missing --run tar"
 S["am__leading_dot"]="."
 S["SET_MAKE"]=""
 S["AWK"]="mawk"
@@ -865,12 +865,12 @@ S["mkdir_p"]="/bin/mkdir -p"
 S["MKDIR_P"]="/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]="strip"
-S["install_sh"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-1.4.14b-stable/install-sh"
-S["MAKEINFO"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-1.4.14b-stable/missing --run makeinfo"
-S["AUTOHEADER"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-1.4.14b-stable/missing --run autoheader"
-S["AUTOMAKE"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-1.4.14b-stable/missing --run automake-1.11"
-S["AUTOCONF"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-1.4.14b-stable/missing --run autoconf"
-S["ACLOCAL"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-1.4.14b-stable/missing --run aclocal-1.11"
+S["install_sh"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-shawn/install-sh"
+S["MAKEINFO"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-shawn/missing --run makeinfo"
+S["AUTOHEADER"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-shawn/missing --run autoheader"
+S["AUTOMAKE"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-shawn/missing --run automake-1.11"
+S["AUTOCONF"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-shawn/missing --run autoconf"
+S["ACLOCAL"]="${SHELL} /home/shawny/software/eclipse/workspace/libevent-shawn/missing --run aclocal-1.11"
 S["VERSION"]="1.4.14b-stable"
 S["PACKAGE"]="libevent"
 S["CYGPATH_W"]="echo"
