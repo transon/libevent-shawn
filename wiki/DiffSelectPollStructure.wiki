@@ -1,0 +1,51 @@
+#Catch the different places between select.c and poll.c
+
+= Introduction =
+
+Understand and different the structure
+
+
+= Details =
+
+struct selectop {
+    // highest fd in fdset
+    int event_fds;	
+
+    // event_fdsz * 8 means the array size of event_r_by_fd/event_w_by_fd	
+    int event_fdsz;
+
+    // the user can register the r/w at here
+    fd_set *event_readset_in; 
+    fd_set *event_writeset_in;
+
+    // select will use these copy fds from in, because 
+    // select will eliminate the unready fd
+    fd_set *event_readset_out; 
+    fd_set *event_writeset_out;
+
+    // store the struct event, one fd, one struct event
+    struct event **event_r_by_fd; 
+    struct event **event_w_by_fd;
+};
+
+
+struct pollop {
+    // highest number alloc
+    int event_count;
+ 
+    // size of event_*		
+    int nfds;               
+
+    // Size of idxplus1_by_fd 
+    int fd_count;
+                  
+    struct pollfd *event_set;
+
+    struct event **event_r_back;
+    struct event **event_w_back;
+
+    // Index into event_set by fd; we add 1 so 
+    // that 0 (which is easy to memset) can mean "no entry."
+    int *idxplus1_by_fd; 
+};
+
