@@ -124,9 +124,9 @@ evsignal_init(struct event_base *base)
 	for (i = 0; i < NSIG; ++i)
 		TAILQ_INIT(&base->sig.evsigevents[i]);
 
-        evutil_make_socket_nonblocking(base->sig.ev_signal_pair[0]);
+    evutil_make_socket_nonblocking(base->sig.ev_signal_pair[0]); // write side
 
-	event_set(&base->sig.ev_signal, base->sig.ev_signal_pair[1],
+	event_set(&base->sig.ev_signal, base->sig.ev_signal_pair[1], // read side
 		EV_READ | EV_PERSIST, evsignal_cb, &base->sig.ev_signal);
 	base->sig.ev_signal.ev_base = base;
 	base->sig.ev_signal.ev_flags |= EVLIST_INTERNAL;

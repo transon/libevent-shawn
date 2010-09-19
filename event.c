@@ -718,6 +718,7 @@ event_pending(struct event *ev, short event, struct timeval *tv)
 	return (flags & event);
 }
 
+// IO + timeout
 int
 event_add(struct event *ev, const struct timeval *tv)
 {
@@ -734,7 +735,11 @@ event_add(struct event *ev, const struct timeval *tv)
 		 tv ? "EV_TIMEOUT " : " ",
 		 ev->ev_callback));
 
-	assert(!(ev->ev_flags & ~EVLIST_ALL));
+	assert(!(ev->ev_flags & ~EVLIST_ALL)); // only the defined bits can be set, eg: EVLIST_ACTIVE
+
+
+	// ev_flags -> deposition
+	// ev_events -> action
 
 	/*
 	 * prepare for timeout insertion further below, if we get a
@@ -751,6 +756,9 @@ event_add(struct event *ev, const struct timeval *tv)
 		res = evsel->add(evbase, ev);
 		if (res != -1)
 			event_queue_insert(base, ev, EVLIST_INSERTED);
+
+		// add the event into real instance (eg: FD_SET) and register queue
+		// insert first, then do set the bit
 	}
 
 	/* 
@@ -822,15 +830,15 @@ event_del(struct event *ev)
 		*ev->ev_pncalls = 0;
 	}
 
-	if (ev->ev_flags & EVLIST_TIMEOUT)
+	if (ev->ev_flags & EVLIST_TIMEOUT) // heap
 		event_queue_remove(base, ev, EVLIST_TIMEOUT);
 
-	if (ev->ev_flags & EVLIST_ACTIVE)
+	if (ev->ev_flags & EVLIST_ACTIVE) // active queue
 		event_queue_remove(base, ev, EVLIST_ACTIVE);
 
-	if (ev->ev_flags & EVLIST_INSERTED) {
+	if (ev->ev_flags & EVLIST_INSERTED) { // register queue
 		event_queue_remove(base, ev, EVLIST_INSERTED);
-		return (evsel->del(evbase, ev));
+		return (evsel->del(evbase, ev)); // call the real method of select/poll/epoll
 	}
 
 	return (0);
@@ -933,7 +941,7 @@ timeout_process(struct event_base *base)
 
 	gettime(base, &now);
 
-	while ((ev = min_heap_top(&base->timeheap))) {
+	while ((ev = min_heap_top(&base->timeheap))) { // min_heap_top only a check method
 		if (evutil_timercmp(&ev->ev_timeout, &now, >))
 			break;
 
@@ -942,21 +950,21 @@ timeout_process(struct event_base *base)
 
 		event_debug(("timeout_process: call %p",
 			 ev->ev_callback));
-		event_active(ev, EV_TIMEOUT, 1);
+		event_active(ev, EV_TIMEOUT, 1); // move the timeout event from heap/queue into active queue
 	}
 }
 
 void
 event_queue_remove(struct event_base *base, struct event *ev, int queue)
 {
-	if (!(ev->ev_flags & queue))
+	if (!(ev->ev_flags & queue)) // check the relatived bit has been set
 		event_errx(1, "%s: %p(fd %d) not on queue %x", __func__,
 			   ev, ev->ev_fd, queue);
 
-	if (~ev->ev_flags & EVLIST_INTERNAL)
+	if (~ev->ev_flags & EVLIST_INTERNAL) // this event isn't the internal event
 		base->event_count--;
 
-	ev->ev_flags &= ~queue;
+	ev->ev_flags &= ~queue; // eliminate the bits which was set in queue
 	switch (queue) {
 	case EVLIST_INSERTED:
 		TAILQ_REMOVE(&base->eventqueue, ev, ev_next);
@@ -974,10 +982,13 @@ event_queue_remove(struct event_base *base, struct event *ev, int queue)
 	}
 }
 
+/**
+ * insert the event into the relative queue
+ */
 void
 event_queue_insert(struct event_base *base, struct event *ev, int queue)
 {
-	if (ev->ev_flags & queue) {
+	if (ev->ev_flags & queue) { // the bits queue should not be set before calling insert
 		/* Double insertion is possible for active events */
 		if (queue & EVLIST_ACTIVE)
 			return;
@@ -986,20 +997,20 @@ event_queue_insert(struct event_base *base, struct event *ev, int queue)
 			   ev, ev->ev_fd, queue);
 	}
 
-	if (~ev->ev_flags & EVLIST_INTERNAL)
+	if (~ev->ev_flags & EVLIST_INTERNAL) // the event isn't the internal event (eg: signaling socket)
 		base->event_count++;
 
 	ev->ev_flags |= queue;
 	switch (queue) {
-	case EVLIST_INSERTED:
+	case EVLIST_INSERTED:  // insert into the register queue
 		TAILQ_INSERT_TAIL(&base->eventqueue, ev, ev_next);
 		break;
-	case EVLIST_ACTIVE:
+	case EVLIST_ACTIVE: // insert into the active queue
 		base->event_count_active++;
 		TAILQ_INSERT_TAIL(base->activequeues[ev->ev_pri],
 		    ev,ev_active_next);
 		break;
-	case EVLIST_TIMEOUT: {
+	case EVLIST_TIMEOUT: { // insert into the min heap
 		min_heap_push(&base->timeheap, ev);
 		break;
 	}

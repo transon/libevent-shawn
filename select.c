@@ -215,7 +215,7 @@ select_resize(struct selectop *sop, int fdsz)
 	struct event **r_by_fd = NULL;
 	struct event **w_by_fd = NULL;
 
-	n_events = (fdsz/sizeof(fd_mask)) * NFDBITS;
+	n_events = (fdsz/sizeof(fd_mask)) * NFDBITS; // how many bits
 	n_events_old = (sop->event_fdsz/sizeof(fd_mask)) * NFDBITS;
 
 	if (sop->event_readset_in)
@@ -267,7 +267,7 @@ select_add(void *arg, struct event *ev)
 {
 	struct selectop *sop = arg;
 
-	if (ev->ev_events & EV_SIGNAL)
+	if (ev->ev_events & EV_SIGNAL) // deal with signal event
 		return (evsignal_add(ev));
 
 	check_selectop(sop);
@@ -318,17 +318,17 @@ select_del(void *arg, struct event *ev)
 	struct selectop *sop = arg;
 
 	check_selectop(sop);
-	if (ev->ev_events & EV_SIGNAL)
+	if (ev->ev_events & EV_SIGNAL) // deal with signal event
 		return (evsignal_del(ev));
 
-	if (sop->event_fds < ev->ev_fd) {
+	if (sop->event_fds < ev->ev_fd) { // event_fds is the current exist largest fd, so the removed fd should be not larger than it
 		check_selectop(sop);
 		return (0);
 	}
 
-	if (ev->ev_events & EV_READ) {
-		FD_CLR(ev->ev_fd, sop->event_readset_in);
-		sop->event_r_by_fd[ev->ev_fd] = NULL;
+	if (ev->ev_events & EV_READ) { // the event is registered for READ
+		FD_CLR(ev->ev_fd, sop->event_readset_in); // remove the fd from select read set
+		sop->event_r_by_fd[ev->ev_fd] = NULL; // remove fd from array
 	}
 
 	if (ev->ev_events & EV_WRITE) {
@@ -345,7 +345,7 @@ select_dealloc(struct event_base *base, void *arg)
 {
 	struct selectop *sop = arg;
 
-	evsignal_dealloc(base);
+	evsignal_dealloc(base);  // free the signal relative info
 	if (sop->event_readset_in)
 		free(sop->event_readset_in);
 	if (sop->event_writeset_in)
