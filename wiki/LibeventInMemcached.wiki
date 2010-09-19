@@ -1,11 +1,13 @@
-How the mem$d used the libevent?
+=How the mem$d used the libevent?=
+----
+== Introduction ==
 
-= Introduction =
+  *The tree was showed that how libevent was used in mem$d, also it is a scenario that how to use libevent in multi-thread, in mem$d, it uses main thread and worker threads mode, each thread has its own event base, doing its event loop to check the cared event.
+  *Each worker thread has a CQ, main thread will push task into CQ and send a notification to it, so the worker thread will get this notification, then start to process the task in CQ. 
+  *The main thread use the round robin to select the work thread to do the task.
 
-The tree was showed that how libevent was used in mem$d, also it is a scenario that how to use libevent in multi-thread, in mem$d, it uses main thread and worker threads mode, each thread has its own event base, doing its event loop to check the cared event. Each worker thread has a CQ, main thread will push task into CQ and send a notification to it, so the worker thread will get this notification, then start to process the task in CQ. The main thread use the round robin to select the work thread to do the task.
 
-
-= Details =
+== Details ==
 
 {{{
 /* initialize main thread libevent instance */
