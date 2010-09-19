@@ -182,15 +182,20 @@ typedef unsigned char u_char;
 typedef unsigned short u_short;
 #endif
 
-#define EVLIST_TIMEOUT	0x01
-#define EVLIST_INSERTED	0x02
-#define EVLIST_SIGNAL	0x04
-#define EVLIST_ACTIVE	0x08
-#define EVLIST_INTERNAL	0x10
-#define EVLIST_INIT	0x80
+#define EVLIST_TIMEOUT	0x01 // 0000 0001
+#define EVLIST_INSERTED	0x02 // 0000 0010
+#define EVLIST_SIGNAL	0x04 // 0000 0100
+#define EVLIST_ACTIVE	0x08 // 0000 1000
+#define EVLIST_INTERNAL	0x10 // 0001 0000
+#define EVLIST_INIT	    0x80 // 1000 0000
 
 /* EVLIST_X_ Private space: 0x1000-0xf000 */
 #define EVLIST_ALL	(0xf000 | 0x9f)
+
+                    // 1111 0000 0000 0000
+                    //           1001 1111
+                    // -------------------
+                    // 1111 0000 1001 1111
 
 #define EV_TIMEOUT	0x01
 #define EV_READ		0x02
