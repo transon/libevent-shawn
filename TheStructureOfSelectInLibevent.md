@@ -1,0 +1,62 @@
+# How to design the structure of select which used in libevent #
+
+---
+
+
+## Introduction ##
+
+```
+struct selectop {
+    int event_fds;  // 当前最大的套接字描述符
+    int event_fdsz; // 乘以8则代表数组event_r_by_fd/event_w_by_fd的大小
+    fd_set *event_readset_in; // 用户注册的fd，表示其对读感兴趣还是写感兴趣
+    fd_set *event_writeset_in;
+    fd_set *event_readset_out; // 从in拷贝过来一份，这样避免select修改用户注册的fd
+    fd_set *event_writeset_out;
+    struct event **event_r_by_fd; // 存储fd对应的事件指针
+    struct event **event_w_by_fd;
+};
+
+```
+
+```
+// 初始化struct selectop， 为其分配空间，为其中的array分配空间(select_resize)
+static void *select_init(struct event_base *);
+
+// 如何事件对应的描述符大于了当前的描述符最大值，则需要调用select_resize扩展数组
+// 将事件对应的描述符在fdset中置位，当然也需要将事件指针添加到数组event_r/w_by_fd中
+static int select_add(void *, struct event *);
+
+// 从fdset中clear事件对应的描述符，并从事件指针数组中清除事件指针
+static int select_del(void *, struct event *);
+
+// 调用select等待care的事件,然后检测是否有读写事件发生，如果有则将事件指针添加到active队列中
+static int select_dispatch	(struct event_base *, void *, struct timeval *);
+
+// 释放struct selectop的包含的array所占用的空间
+static void select_dealloc(struct event_base *, void *);
+```
+
+```
+const struct eventop selectops = {
+
+    "select",
+
+    select_init,
+
+    select_add,
+
+    select_del,
+
+    select_dispatch,
+
+    select_dealloc,
+
+    0
+};
+```
+
+## Highlight ##
+
+  1. 对于select检测的fdset与用户注册的fdset分开，这样避免了select弄脏了注册的fdset <br>
+<ol><li>更具当前事件对应的fd的大小去动态更改array的大小，避免浪费空间
